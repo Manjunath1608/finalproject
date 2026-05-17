@@ -1,7 +1,41 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import API from '../../api';
 import './DonorPortal.css';
 
 export default function DashboardHome({ donor, stats, onQuickAction }) {
+    const [alerts, setAlerts] = useState([]);
+
+    useEffect(() => {
+        if (donor && (donor.blood_type || donor.blood_group)) {
+            API.get('/api/ai/trigger-alerts')
+                .then(res => {
+                    const allAlerts = res.data.alerts || [];
+                    const myAlerts = allAlerts.filter(a => {
+                        const isBloodMatch = a.blood_group === donor.blood_type || a.blood_group === donor.blood_group;
+                        
+                        let isOrganMatch = true;
+                        if (a.organ && a.organ.trim() !== '' && a.organ.toLowerCase() !== 'none') {
+                            if (a.organ.toLowerCase() === 'whole blood') {
+                                isOrganMatch = donor.donate_blood === true;
+                            } else {
+                                const donorOrgans = (donor.organs || []).map(o => o.toLowerCase());
+                                isOrganMatch = donorOrgans.includes(a.organ.toLowerCase());
+                            }
+                        }
+                        
+                        let isAlreadyVolunteered = false;
+                        if (a.matches && Array.isArray(a.matches)) {
+                            isAlreadyVolunteered = a.matches.some(m => m.donor_id === (donor.user_id || donor.id || donor._id));
+                        }
+
+                        return isBloodMatch && isOrganMatch && !isAlreadyVolunteered;
+                    });
+                    setAlerts(myAlerts);
+                })
+                .catch(err => console.error(err));
+        }
+    }, [donor]);
+
     if (!donor) return <div className="dp-animate-fade">Loading...</div>;
 
     return (
@@ -46,6 +80,18 @@ export default function DashboardHome({ donor, stats, onQuickAction }) {
                     </div>
                 </div>
             </div>
+
+            {alerts.length > 0 && (
+                <div style={{ marginBottom: '2rem', animation: 'fadeInUp 0.5s ease-out' }}>
+                    <h2 className="dp-title" style={{ fontSize: '1.5rem', marginBottom: '1rem', color: '#ff4757', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>⚠️ URGENT AI Alerts</h2>
+                    {alerts.map((alert, idx) => (
+                        <div key={idx} style={{ padding: '1.5rem', background: '#fee2e2', borderRadius: '10px', borderLeft: '6px solid #dc2626', marginBottom: '1rem', color: '#7f1d1d', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
+                            <div style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '0.5rem' }}>{alert.message}</div>
+                            <div style={{ fontSize: '0.9rem' }}>Your profile matches an urgent request. Please check Active Requests to find and accept the match.</div>
+                        </div>
+                    ))}
+                </div>
+            )}
 
             <h2 className="dp-title" style={{ fontSize: '1.5rem', marginBottom: '1.5rem' }}>Start Saving Lives</h2>
             <div className="dp-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>

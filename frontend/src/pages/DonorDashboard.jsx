@@ -115,6 +115,7 @@ export default function DonorDashboard() {
         {activeTab === 'active-requests' && (
           <ActiveRequests
             donor={donorProfile}
+            onAction={fetchData}
           />
         )}
         {activeTab === 'history' && (

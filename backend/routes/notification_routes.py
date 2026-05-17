@@ -5,13 +5,13 @@ from typing import List, Dict, Any
 notification_router = APIRouter()
 
 @notification_router.get("/", response_model=List[Dict[str, Any]])
-def get_notifications(current_user: Dict = Depends(get_current_user)):
+def get_notifications(current_user = Depends(get_current_user)):
     """
     Get notifications for the current user.
     Mocked for now - in production this would query a notifications collection.
     """
     # Mock notifications based on role
-    role = current_user.get("role")
+    role = current_user.role
     notifications = []
     
     if role == "donor":

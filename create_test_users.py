@@ -26,7 +26,7 @@ for user_data in users_to_create:
     # Check if user already exists
     existing = u_coll.find_one({"email": user_data["email"]})
     if existing:
-        print(f"✓ User {user_data['email']} already exists")
+        print(f"[OK] User {user_data['email']} already exists")
     else:
         u_coll.insert_one({
             "email": user_data["email"],
@@ -34,7 +34,7 @@ for user_data in users_to_create:
             "role": user_data["role"],
             "is_active": True
         })
-        print(f"✓ Created user: {user_data['email']} (password: {user_data['password']})")
+        print(f"[OK] Created user: {user_data['email']} (password: {user_data['password']})")
 
 print("\n" + "="*50)
 print("TEST CREDENTIALS:")

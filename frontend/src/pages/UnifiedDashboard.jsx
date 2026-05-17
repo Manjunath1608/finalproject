@@ -12,6 +12,7 @@ export default function UnifiedDashboard() {
   const [showDonorForm, setShowDonorForm] = useState(false)
   const [matchResults, setMatchResults] = useState([])
   const [searchLoading, setSearchLoading] = useState(false)
+  const [demandPrediction, setDemandPrediction] = useState(null)
 
   const [donorForm, setDonorForm] = useState({
     name: '', age: '', blood_group: 'O+', organ: 'Kidney',
@@ -41,6 +42,8 @@ export default function UnifiedDashboard() {
       setDonors(donorsRes.data || [])
       setHospitals(hospitalsRes.data || [])
       setRequests(requestsRes.data || [])
+
+      API.get('/api/ai/predict-demand').then(res => setDemandPrediction(res.data)).catch(err => console.error(err))
 
       const bloodGroups = new Set((donorsRes.data || []).map(d => d.blood_group)).size
       setStats({
@@ -508,6 +511,14 @@ export default function UnifiedDashboard() {
                   <strong style={{ color: '#11998e' }}>Performance</strong>
                   <p style={{ margin: '0.5rem 0 0 0', color: '#666', fontSize: '0.9rem' }}>System response time: 145ms (Excellent)</p>
                 </div>
+                {demandPrediction && (
+                  <div style={{ padding: '1rem', margin: '0.5rem 0', background: 'linear-gradient(to right, #f8f9fc, #eef2ff)', borderLeft: '4px solid #4f46e5', borderRadius: '5px' }}>
+                    <strong style={{ color: '#4f46e5', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>🔮 AI Demand Prediction</strong>
+                    <p style={{ margin: '0.5rem 0 0 0', color: '#374151', fontSize: '0.95rem', fontWeight: '500' }}>
+                      {demandPrediction.prediction}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>

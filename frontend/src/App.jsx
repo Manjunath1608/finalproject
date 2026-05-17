@@ -15,6 +15,8 @@ import RecipientLogin from './pages/RecipientLogin'
 import HospitalLogin from './pages/HospitalLogin'
 import AdminLogin from './pages/AdminLogin'
 import DonorProfileSetup from './pages/DonorProfileSetup'
+import EligibilityChecker from './pages/EligibilityChecker'
+import ChatbotWidget from './components/ChatbotWidget'
 import API from './api'
 
 export default function App() {
@@ -60,6 +62,7 @@ export default function App() {
 
   return (
     <div className="app">
+      <ChatbotWidget />
       {!isLoginPage && (
         <header>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -103,6 +106,7 @@ export default function App() {
           <Route path="/recipient/dashboard" element={user && user.role === 'recipient' ? <RecipientPortal /> : <Login onLoginSuccess={() => fetchUser()} />} />
 
           <Route path="/dashboard" element={<UnifiedDashboard />} />
+          <Route path="/eligibility" element={<EligibilityChecker />} />
         </Routes>
       </main>
     </div>

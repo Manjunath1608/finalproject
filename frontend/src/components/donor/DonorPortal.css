@@ -139,6 +139,7 @@
     margin-bottom: 1.5rem;
     border: 1px solid transparent;
     transition: transform 0.2s, box-shadow 0.2s;
+    color: var(--dp-text);
 }
 
 .dp-card:hover {

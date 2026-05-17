@@ -4,6 +4,7 @@ import API from '../api'
 export default function HospitalPortal() {
   const [matches, setMatches] = useState([])
   const [donors, setDonors] = useState([])
+  const [originalDonors, setOriginalDonors] = useState([])
   const [requests, setRequests] = useState([])
   const [activeTab, setActiveTab] = useState('dashboard')
   const [loading, setLoading] = useState(true)
@@ -20,6 +21,7 @@ export default function HospitalPortal() {
         API.get('/api/requests')
       ])
       setDonors(donorsRes.data)
+      setOriginalDonors(donorsRes.data)
       setRequests(requestsRes.data)
       setLoading(false)
     } catch (err) {
@@ -31,14 +33,27 @@ export default function HospitalPortal() {
   const findMatches = async (requestId) => {
     try {
       const request = requests.find(r => r.id === requestId)
+      const res = await API.post('/api/ai/match-donors', {
+        blood_group: request.blood_type || '',
+        organ: request.organ_needed || '',
+        location: '' // Can be enhanced if request.location exists
+      })
+      const aiMatches = (res.data.matches || []).map(d => ({
+        ...d,
+        blood_type: d.blood_group || d.blood_type
+      }))
+      setMatches(aiMatches)
+      setSelectedRequest(request)
+    } catch (err) {
+      console.error('Error finding matches with AI:', err)
+      // Fallback
+      const request = requests.find(r => r.id === requestId)
       const organDonors = donors.filter(d => 
         d.organs?.includes(request.organ_needed) &&
         d.blood_type === request.blood_type
       )
       setMatches(organDonors)
       setSelectedRequest(request)
-    } catch (err) {
-      console.error('Error finding matches:', err)
     }
   }
 
@@ -262,7 +277,27 @@ export default function HospitalPortal() {
           borderRadius: '10px',
           boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
         }}>
-          <h2 style={{ marginTop: 0 }}>Active Donors</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h2 style={{ margin: 0 }}>Active Donors</h2>
+            <input
+              type="text"
+              placeholder="AI Smart Search (e.g. 'O+ near Bangalore')"
+              onKeyDown={async (e) => {
+                if (e.key === 'Enter') {
+                  const val = e.target.value
+                  if (!val) { setDonors(originalDonors); return; }
+                  try {
+                    const res = await API.post('/api/ai/smart-search', { query: val })
+                    const mapped = (res.data.results || []).map(d => ({...d, blood_type: d.blood_group || d.blood_type}))
+                    setDonors(mapped)
+                  } catch(err) {
+                    console.error(err)
+                  }
+                }
+              }}
+              style={{ width: '300px', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1' }}
+            />
+          </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
             {donors.map((donor, idx) => (
               <div key={idx} style={{

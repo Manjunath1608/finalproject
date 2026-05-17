@@ -141,6 +141,7 @@
     box-shadow: var(--rp-shadow);
     margin-bottom: 1.5rem;
     border: 1px solid transparent;
+    color: var(--rp-text);
 }
 
 .rp-card:hover {

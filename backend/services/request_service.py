@@ -41,3 +41,70 @@ class RequestService:
 
     def get_request_by_id(self, request_id: str) -> Optional[DonationRequest]:
         return self.repository.get(request_id)
+
+    def volunteer_for_request(self, request_id: str, donor_user_id: str) -> DonationRequest:
+        request = self.get_request_by_id(request_id)
+        if not request:
+            raise ValueError("Request not found")
+            
+        from repositories.donor_repository import DonorRepository
+        donor = DonorRepository().get_by_user_id(donor_user_id)
+        
+        matches = request.matches or []
+        # Check if already volunteered
+        if not any(m.get('donor_id') == donor_user_id for m in matches):
+            matches.append({
+                "donor_id": donor_user_id,
+                "blood_group": donor.blood_group if donor else "Unknown",
+                "distance": "0 km", # Mock distance for explicit volunteer
+                "score": 100,
+                "availability": True
+            })
+            
+        return self.repository.update(request_id, {
+            "matches": matches,
+            "status": "matched"
+        })
+
+    def accept_match(self, request_id: str, donor_id: str, recipient_id: str) -> DonationRequest:
+        request = self.get_request_by_id(request_id)
+        if not request:
+            raise ValueError("Request not found")
+            
+        if request.user_id and request.user_id != recipient_id:
+            raise ValueError("Unauthorized to accept this match")
+            
+        return self.repository.update(request_id, {
+            "status": "fulfilled"
+        })
+
+    def decline_match(self, request_id: str, donor_id: str, recipient_id: str) -> DonationRequest:
+        request = self.get_request_by_id(request_id)
+        if not request:
+            raise ValueError("Request not found")
+            
+        if request.user_id and request.user_id != recipient_id:
+            raise ValueError("Unauthorized to decline this match")
+            
+        matches = request.matches or []
+        # Remove the declined donor from matches
+        matches = [m for m in matches if m.get('donor_id') != donor_id]
+        
+        status = request.status
+        if not matches and status == 'matched':
+            status = 'pending'
+            
+        return self.repository.update(request_id, {
+            "matches": matches,
+            "status": status
+        })
+
+    def cancel_request(self, request_id: str, user_id: str) -> DonationRequest:
+        request = self.get_request_by_id(request_id)
+        if not request:
+            raise ValueError("Request not found")
+        if request.user_id != user_id:
+            raise ValueError("Unauthorized to cancel this request")
+            
+        return self.repository.update(request_id, {"status": "cancelled"})
+

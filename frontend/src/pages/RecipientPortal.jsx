@@ -43,7 +43,7 @@ export default function RecipientPortal() {
 
       // 3. Calc Stats
       const active = reqRes.data.filter(r => r.status === 'pending' || r.status === 'matched');
-      const matches = reqRes.data.filter(r => r.matches && r.matches.length > 0).length; // Count requests with matches or total matches?
+      const matches = reqRes.data.reduce((acc, r) => acc + (r.matches && r.matches.length > 0 ? r.matches.length : 0), 0);
       const completed = reqRes.data.filter(r => r.status === 'fulfilled' || r.status === 'completed');
 
       // Mock notifications count
@@ -81,13 +81,11 @@ export default function RecipientPortal() {
   const handleCancelRequest = async (id) => {
     if (!window.confirm("Are you sure you want to cancel this request?")) return;
     try {
-      // API endpoint for delete/cancel doesn't exist in standard 'request_routes' usually, 
-      // but let's assume standard REST or simulate
-      // await API.delete(`/api/requests/${id}`); 
-      alert("Request cancellation simulated.");
+      await API.delete(`/api/requests/${id}`); 
       refreshRequests();
     } catch (e) {
       console.error(e);
+      alert("Failed to cancel the request.");
     }
   };
 
@@ -132,6 +130,7 @@ export default function RecipientPortal() {
         {activeTab === 'matched-donors' && (
           <MatchedDonors
             activeRequests={requests}
+            onAction={fetchData}
           />
         )}
         {activeTab === 'history' && (

@@ -27,16 +27,16 @@ class DonorService:
         
         return created_donor
 
-    def get_all_donors(self) -> List[Donor]:
+    def get_all_donors(self) -> List[DonorModel]:
         return self.repository.get_multi()
 
-    def get_donor_by_id(self, donor_id: str) -> Optional[Donor]:
+    def get_donor_by_id(self, donor_id: str) -> Optional[DonorModel]:
         return self.repository.get(donor_id)
         
-    def get_donor_profile(self, user_id: str) -> Optional[Donor]:
+    def get_donor_profile(self, user_id: str) -> Optional[DonorModel]:
         return self.repository.get_by_user_id(user_id)
         
-    def update_donor_profile(self, user_id: str, update_data: dict) -> Optional[Donor]:
+    def update_donor_profile(self, user_id: str, update_data: dict) -> Optional[DonorModel]:
         donor = self.repository.get_by_user_id(user_id)
         if not donor:
             return None

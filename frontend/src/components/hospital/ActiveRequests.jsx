@@ -5,7 +5,7 @@ export default function ActiveRequests({ requests, onCancel, onViewMatches }) {
     // Filter out fulfilled/history requests if needed, but the prompt says 
     // "Active Requests" vs "Donation History". 
     // So I assume 'requests' passed here are active ones.
-    const activeRequests = requests.filter(r => r.status !== 'fulfilled');
+    const activeRequests = requests.filter(r => r.status !== 'fulfilled' && r.status !== 'cancelled');
 
     const getUrgencyBadge = (urgency) => {
         let color = 'info';

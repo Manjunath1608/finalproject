@@ -2,7 +2,7 @@ import React from 'react';
 import API from '../../api';
 
 export default function ActiveRequests({ requests, onCancel }) {
-    const activeRequests = requests.filter(r => r.status !== 'fulfilled');
+    const activeRequests = requests.filter(r => r.status !== 'fulfilled' && r.status !== 'cancelled');
 
     return (
         <div className="rp-animate-fade">

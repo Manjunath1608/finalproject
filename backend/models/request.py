@@ -18,6 +18,6 @@ class DonationRequest(BaseModel):
     required_date: str # ISO Date string
     health_condition: Optional[str] = None
     consent_agreement: bool = False
-    status: Literal["pending", "matched", "fulfilled"] = "pending"
+    status: Literal["pending", "matched", "fulfilled", "cancelled"] = "pending"
     matches: List[dict] = []
     created_at: Optional[str] = None

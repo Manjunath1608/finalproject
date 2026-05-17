@@ -12,6 +12,7 @@ from routes.auth_routes import auth_router
 from routes.admin_routes import admin_router
 from routes.notification_routes import notification_router
 from routes.analysis_routes import analysis_router
+from routes.ai_routes import router as ai_router
 import database
 from utils.logger import setup_logging
 import logging
@@ -36,6 +37,7 @@ app.include_router(request_router, prefix="/api/requests", tags=["request"])
 app.include_router(admin_router, prefix="/api/admin", tags=["admin"])
 app.include_router(notification_router, prefix="/api/notifications", tags=["notifications"])
 app.include_router(analysis_router, prefix="/api/analysis", tags=["analysis"])
+app.include_router(ai_router, prefix="/api/ai", tags=["ai"])
 
 # Exception Handlers
 app.add_exception_handler(AppError, app_exception_handler)

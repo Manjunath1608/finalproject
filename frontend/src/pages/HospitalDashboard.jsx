@@ -65,6 +65,17 @@ export default function HospitalDashboard() {
     window.location.href = '/login';
   };
 
+  const handleCancelRequest = async (id) => {
+    if (!window.confirm("Are you sure you want to cancel this request?")) return;
+    try {
+      await API.delete(`/api/requests/${id}`);
+      fetchData();
+    } catch (e) {
+      console.error(e);
+      alert("Failed to cancel the request.");
+    }
+  };
+
   // Helper to switch tabs
   const handleViewMatches = () => setActiveTab('matched-donors');
   const handleAfterRequest = () => {
@@ -92,7 +103,7 @@ export default function HospitalDashboard() {
         {activeTab === 'active-requests' && (
           <ActiveRequests
             requests={requests}
-            onCancel={(id) => alert("Cancel logic placeholder for " + id)}
+            onCancel={handleCancelRequest}
             onViewMatches={handleViewMatches}
           />
         )}
