@@ -31,8 +31,14 @@ export default function DonateBlood({ donor, onUpdate }) {
         setLoading(true);
         setMsg('');
         try {
-            // Clean up empty strings to null/undefined if necessary, but API handles strings well.
-            await API.put('/api/donors/me', formData);
+            const fullDonorData = {
+                ...donor,
+                ...formData
+            };
+            if (!fullDonorData.last_donation) {
+                fullDonorData.last_donation = null;
+            }
+            await API.put('/api/donors/me', fullDonorData);
             setMsg('✓ Blood donation profile updated successfully!');
             if (onUpdate) onUpdate();
         } catch (err) {

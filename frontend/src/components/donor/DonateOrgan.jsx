@@ -42,7 +42,14 @@ export default function DonateOrgan({ donor, onUpdate }) {
         setLoading(true);
         setMsg('');
         try {
-            await API.put('/api/donors/me', formData);
+            const fullDonorData = {
+                ...donor,
+                ...formData
+            };
+            if (!fullDonorData.last_donation) {
+                fullDonorData.last_donation = null;
+            }
+            await API.put('/api/donors/me', fullDonorData);
             setMsg('✓ Organ donation preferences updated successfully!');
             if (onUpdate) onUpdate();
         } catch (err) {
